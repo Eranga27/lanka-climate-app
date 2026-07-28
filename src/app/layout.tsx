@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
@@ -8,11 +8,49 @@ const poppins = Poppins({
   variable: "--font-poppins",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#0F172A",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
-  title: "Lanka Climate Hub",
-  description: "Sri Lanka's Central Climate Intelligence & Environmental Monitoring Platform",
+  title: {
+    default: "Lanka Climate Hub — Sri Lanka's Climate Intelligence Platform",
+    template: "%s | Lanka Climate Hub",
+  },
+  description:
+    "Sri Lanka's central climate intelligence and environmental monitoring platform. Real-time weather, ENSO analytics, disaster alerts, marine conditions, agricultural forecasts and historical climate data.",
+  keywords: [
+    "Sri Lanka weather",
+    "climate intelligence",
+    "ENSO Sri Lanka",
+    "flood warning",
+    "monsoon forecast",
+    "environmental monitoring",
+    "disaster management Sri Lanka",
+    "agriculture climate",
+    "marine forecast Sri Lanka",
+  ],
+  authors: [{ name: "Lanka Climate Hub Team" }],
+  creator: "Lanka Climate Hub",
+  openGraph: {
+    type: "website",
+    locale: "en_LK",
+    siteName: "Lanka Climate Hub",
+    title: "Lanka Climate Hub — Sri Lanka's Climate Intelligence Platform",
+    description:
+      "Monitor real-time weather, climate change impacts, disaster risk, and environmental conditions across Sri Lanka.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Lanka Climate Hub",
+    description: "Sri Lanka's central climate intelligence platform.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
@@ -21,13 +59,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${poppins.variable} h-full antialiased dark`}
-    >
+    <html lang="en" className={`${poppins.variable} h-full antialiased dark`}>
       <body className="min-h-full flex flex-col bg-background text-foreground pb-24 lg:pb-0">
         <Navbar />
-        <main className="flex-1 flex flex-col relative w-full h-full">
+        <main id="main-content" className="flex-1 flex flex-col relative w-full h-full" tabIndex={-1}>
           {children}
         </main>
         <Footer />

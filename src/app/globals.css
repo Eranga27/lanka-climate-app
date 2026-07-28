@@ -1,69 +1,163 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0F172A;
-  --color-foreground: #F8FAFC;
+  /* ── Brand Palette ──────────────────────────────────────────── */
+  --color-background:          #0F172A;
+  --color-foreground:          #F8FAFC;
 
-  --color-card: #1E293B;
-  --color-card-foreground: #F8FAFC;
+  --color-card:                #1E293B;
+  --color-card-foreground:     #F8FAFC;
+  --color-popover:             #1E293B;
+  --color-popover-foreground:  #F8FAFC;
 
-  --color-popover: #1E293B;
-  --color-popover-foreground: #F8FAFC;
+  --color-primary:             #2563EB;
+  --color-primary-foreground:  #FFFFFF;
+  --color-secondary:           #38BDF8;
+  --color-secondary-foreground:#0F172A;
 
-  --color-primary: #2563EB;
-  --color-primary-foreground: #FFFFFF;
+  --color-muted:               #334155;
+  --color-muted-foreground:    #94A3B8;
+  --color-accent:              #38BDF8;
+  --color-accent-foreground:   #0F172A;
 
-  --color-secondary: #38BDF8;
-  --color-secondary-foreground: #0F172A;
-
-  --color-muted: #334155;
-  --color-muted-foreground: #94A3B8;
-
-  --color-accent: #38BDF8;
-  --color-accent-foreground: #0F172A;
-
-  --color-destructive: #EF4444;
+  --color-destructive:         #EF4444;
   --color-destructive-foreground: #FAFAFA;
 
-  --color-border: #334155;
-  --color-input: #334155;
-  --color-ring: #2563EB;
+  --color-border:              #334155;
+  --color-input:               #334155;
+  --color-ring:                #2563EB;
 
-  --color-safe: #10B981;
-  --color-warning: #EAB308;
-  --color-elevated: #F97316;
-  --color-danger: #EF4444;
-  --color-extreme: #8B5CF6;
+  /* ── Semantic Risk Colours ──────────────────────────────────── */
+  --color-safe:                #10B981;
+  --color-warning:             #EAB308;
+  --color-elevated:            #F97316;
+  --color-danger:              #EF4444;
+  --color-extreme:             #8B5CF6;
 
-  --radius-lg: 1rem;
-  --radius-md: 0.75rem;
-  --radius-sm: 0.5rem;
+  /* ── Radius Tokens ──────────────────────────────────────────── */
+  --radius-2xl: 1rem;
+  --radius-lg:  0.75rem;
+  --radius-md:  0.5rem;
+  --radius-sm:  0.375rem;
 
+  /* ── Typography ─────────────────────────────────────────────── */
   --font-sans: var(--font-poppins);
 }
 
+/* ── Base Layer ───────────────────────────────────────────────────── */
 @layer base {
-  * {
-    @apply border-border;
+  *, *::before, *::after {
+    box-sizing: border-box;
+    border-color: var(--color-border);
   }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
-    @apply bg-background text-foreground font-sans antialiased;
-    background-image: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent 40%),
-                      radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.05), transparent 40%);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans), system-ui, sans-serif;
+    background-image:
+      radial-gradient(circle at 80% 10%, rgba(37, 99, 235, 0.06), transparent 45%),
+      radial-gradient(circle at 10% 90%, rgba(56, 189, 248, 0.05), transparent 45%);
     background-attachment: fixed;
+    min-height: 100vh;
   }
+
+  /* Accessible focus ring */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Remove default list styles in nav */
+  nav ul, nav ol { list-style: none; margin: 0; padding: 0; }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar            { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track      { background: transparent; }
+  ::-webkit-scrollbar-thumb      { background: rgba(148,163,184,0.2); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover{ background: rgba(148,163,184,0.4); }
 }
 
+/* ── Component Utilities ──────────────────────────────────────────── */
 @layer utilities {
+  /* Glassmorphism */
   .glass {
-    @apply bg-card/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.12)];
-  }
-  
-  .glass-card {
-    @apply bg-[#1E293B]/60 backdrop-blur-md border border-white/5 shadow-lg;
+    background: rgba(30, 41, 59, 0.65);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   }
 
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#38BDF8] to-[#2563EB];
+  .glass-card {
+    background: rgba(30, 41, 59, 0.55);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
   }
+
+  /* Text gradients */
+  .text-gradient {
+    background: linear-gradient(to right, #38BDF8, #2563EB);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-warm {
+    background: linear-gradient(to right, #F97316, #EF4444);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Hide scrollbar but keep scrollable */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Fade edges for horizontal scroll */
+  .mask-edges {
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  }
+
+  /* Glow effect utilities */
+  .glow-primary { box-shadow: 0 0 20px rgba(37, 99, 235, 0.3); }
+  .glow-safe    { box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+  .glow-danger  { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);  }
+  .glow-extreme { box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
+
+  /* Animation pulse for live indicators */
+  @keyframes live-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+  .animate-live { animation: live-pulse 2s ease-in-out infinite; }
+
+  /* Skeleton shimmer */
+  @keyframes shimmer {
+    from { background-position: -200% center; }
+    to   { background-position:  200% center; }
+  }
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.03) 25%,
+      rgba(255,255,255,0.08) 50%,
+      rgba(255,255,255,0.03) 75%
+    );
+    background-size: 200% auto;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* Page section spacing */
+  .page-section { @apply px-4 md:px-6 lg:px-8; }
 }
