@@ -21,10 +21,10 @@ L.Icon.Default.mergeOptions({
 
 // Base map options
 const BASE_MAPS = {
+  satellite: { name: "Google Satellite", url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" },
   dark: { name: "Dark Mode", url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" },
-  satellite: { name: "Satellite", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" },
-  terrain: { name: "Terrain", url: "https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.png" },
-  road: { name: "Road View", url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" }
+  terrain: { name: "Google Terrain", url: "https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}" },
+  road: { name: "Google Roadmap", url: "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" }
 };
 
 const LAYERS = [
@@ -65,7 +65,7 @@ function MapController({ center, zoom }: { center: [number, number], zoom: numbe
 }
 
 export default function LiveMap() {
-  const [baseMap, setBaseMap] = useState<keyof typeof BASE_MAPS>("dark");
+  const [baseMap, setBaseMap] = useState<keyof typeof BASE_MAPS>("satellite");
   const [activeLayers, setActiveLayers] = useState<string[]>(["temp"]);
   const [selectedDistrict, setSelectedDistrict] = useState<typeof DISTRICTS[0] | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([7.8731, 80.7718]);
@@ -167,8 +167,7 @@ export default function LiveMap() {
         >
           <TileLayer
             url={BASE_MAPS[baseMap].url}
-            attribution='&copy; <a href="https://carto.com/">Carto</a> contributors'
-            className={baseMap === "satellite" ? "filter brightness-90 saturate-150" : ""}
+            attribution='Map data &copy; <a href="https://www.google.com/maps">Google</a>'
           />
           <ZoomControl position="bottomright" />
           <MapController center={mapCenter} zoom={mapZoom} />
