@@ -1,6 +1,6 @@
 "use client";
 
-import { Info, Globe, Shield, Users, Zap, Database, Heart, Github, ExternalLink, Mail } from "lucide-react";
+import { Info, Globe, Shield, Users, Zap, Database, Heart, ExternalLink, Mail } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -206,7 +206,7 @@ export default function AboutPage() {
           <Card className="glass-card border-white/5">
             <CardContent className="p-6 flex flex-col gap-3">
               <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                <Github className="h-5 w-5 text-white" /> Open Source & Contact
+                <ExternalLink className="h-5 w-5 text-white" /> Open Source & Contact
               </h3>
               <a
                 href="https://github.com/Eranga27/lanka-climate-app"
@@ -214,7 +214,7 @@ export default function AboutPage() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 rounded-xl bg-black/20 border border-white/5 hover:border-primary/40 hover:bg-primary/5 transition-all group"
               >
-                <Github className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
+                <ExternalLink className="h-5 w-5 text-muted-foreground group-hover:text-primary" />
                 <span className="text-sm text-muted-foreground group-hover:text-white">github.com/Eranga27/lanka-climate-app</span>
                 <ExternalLink className="h-3.5 w-3.5 text-muted-foreground ml-auto" />
               </a>

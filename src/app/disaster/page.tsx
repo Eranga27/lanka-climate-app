@@ -142,9 +142,9 @@ export default function DisasterPage() {
             <p className="text-white font-medium">Severe Cyclonic Storm forming in the Bay of Bengal. Immediate evacuation orders active for Northern coastal regions.</p>
           </div>
         </div>
-        <Button variant="destructive" className="relative z-10 shrink-0 bg-extreme hover:bg-extreme/90 text-white font-bold">
+        <button className="relative z-10 shrink-0 px-4 py-2 rounded-xl bg-extreme hover:bg-extreme/90 text-white font-bold text-sm transition-colors">
           View Emergency Protocol
-        </Button>
+        </button>
       </motion.div>
 
       <PageHeader 

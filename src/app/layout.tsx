@@ -1,15 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Poppins } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap",
-});
 
 export const viewport: Viewport = {
   themeColor: "#0F172A",
@@ -59,8 +51,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable} h-full antialiased dark`}>
-      <body className="min-h-full flex flex-col bg-background text-foreground pb-24 lg:pb-0">
+    <html lang="en" className="h-full antialiased dark">
+      <head>
+        {/* Poppins via Google Fonts CDN — no next/font dependency */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body
+        className="min-h-full flex flex-col bg-background text-foreground pb-24 lg:pb-0"
+        style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}
+      >
         <Navbar />
         <main id="main-content" className="flex-1 flex flex-col relative w-full h-full" tabIndex={-1}>
           {children}

@@ -6,7 +6,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { 
   ThermometerSun, Droplets, Wind, Activity, Sun, AlertTriangle, 
-  Map as MapIcon, Cloud, CloudLightning, Waves, X, Layers, Maximize
+  Map as MapIcon, Cloud, CloudLightning, Waves, X, Layers, Maximize, Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { 
   ThermometerSun, Droplets, Wind, Activity, Sun, AlertTriangle, 
   Map as MapIcon, Cloud, ArrowRight, ShieldCheck, Database, Zap, 
-  TreePine, Sprout, BarChart3, CloudRain, ChevronRight
+  TreePine, Sprout, BarChart3, CloudRain, ChevronRight, Globe
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

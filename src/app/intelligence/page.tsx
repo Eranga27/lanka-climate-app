@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Activity, Waves, Wind, ThermometerSun, AlertTriangle, Sprout, Droplets, ArrowUpRight, ArrowDownRight, Globe2 } from "lucide-react";
+import { Activity, Waves, Wind, ThermometerSun, AlertTriangle, Sprout, Droplets, ArrowUpRight, ArrowDownRight, Globe2, Sun } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ReactECharts from "echarts-for-react";

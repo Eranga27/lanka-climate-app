@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Globe, Twitter, Github, Mail } from "lucide-react";
+import { Globe, MessageCircle, ExternalLink, Mail } from "lucide-react";
 
 export function Footer() {
   return (
@@ -43,9 +43,9 @@ export function Footer() {
           <div>
             <h3 className="font-semibold text-white mb-4">Connect</h3>
             <div className="flex gap-4 mb-4">
-              <a href="#" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"><Twitter className="h-4 w-4" /></a>
-              <a href="https://github.com/Eranga27/lanka-climate-app" target="_blank" rel="noreferrer" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"><Github className="h-4 w-4" /></a>
-              <a href="#" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"><Mail className="h-4 w-4" /></a>
+              <a href="#" aria-label="Twitter" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"><MessageCircle className="h-4 w-4" /></a>
+              <a href="https://github.com/Eranga27/lanka-climate-app" target="_blank" rel="noreferrer" aria-label="GitHub" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"><ExternalLink className="h-4 w-4" /></a>
+              <a href="#" aria-label="Email" className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"><Mail className="h-4 w-4" /></a>
             </div>
             <p className="text-xs text-muted-foreground">
               Official data sources synchronized with national meteorological agencies.
