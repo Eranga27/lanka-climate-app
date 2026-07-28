@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0F172A;
+  --color-foreground: #F8FAFC;
+
+  --color-card: #1E293B;
+  --color-card-foreground: #F8FAFC;
+
+  --color-popover: #1E293B;
+  --color-popover-foreground: #F8FAFC;
+
+  --color-primary: #2563EB;
+  --color-primary-foreground: #FFFFFF;
+
+  --color-secondary: #38BDF8;
+  --color-secondary-foreground: #0F172A;
+
+  --color-muted: #334155;
+  --color-muted-foreground: #94A3B8;
+
+  --color-accent: #38BDF8;
+  --color-accent-foreground: #0F172A;
+
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FAFAFA;
+
+  --color-border: #334155;
+  --color-input: #334155;
+  --color-ring: #2563EB;
+
+  --color-safe: #10B981;
+  --color-warning: #EAB308;
+  --color-elevated: #F97316;
+  --color-danger: #EF4444;
+  --color-extreme: #8B5CF6;
+
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+
+  --font-sans: var(--font-poppins);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    background-image: radial-gradient(circle at top right, rgba(37, 99, 235, 0.05), transparent 40%),
+                      radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.05), transparent 40%);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-card/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.12)];
+  }
+  
+  .glass-card {
+    @apply bg-[#1E293B]/60 backdrop-blur-md border border-white/5 shadow-lg;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[#38BDF8] to-[#2563EB];
+  }
+}
