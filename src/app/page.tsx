@@ -1,380 +1,300 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import {
-  CloudRain,
-  Wind,
-  ThermometerSun,
-  Activity,
-  AlertTriangle,
-  Map as MapIcon,
-  Globe,
-  Settings,
-  Bell,
-  Search,
-  Droplets,
-  Zap,
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
+import { 
+  ThermometerSun, Droplets, Wind, Activity, Sun, AlertTriangle, 
+  Map as MapIcon, Cloud, ArrowRight, ShieldCheck, Database, Zap, 
+  TreePine, Sprout, BarChart3, CloudRain, ChevronRight
 } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-} from "recharts";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
-const climateData = [
-  { time: "00:00", temp: 24, humidity: 82, rain: 0 },
-  { time: "04:00", temp: 23, humidity: 85, rain: 0 },
-  { time: "08:00", temp: 26, humidity: 78, rain: 10 },
-  { time: "12:00", temp: 31, humidity: 65, rain: 20 },
-  { time: "16:00", temp: 33, humidity: 60, rain: 5 },
-  { time: "20:00", temp: 28, humidity: 75, rain: 0 },
-];
-
-const regions = [
-  { name: "Colombo", temp: 31, status: "safe", aqi: 45, alert: "Normal" },
-  { name: "Galle", temp: 29, status: "warning", aqi: 60, alert: "High Tide Warning" },
-  { name: "Nuwara Eliya", temp: 18, status: "safe", aqi: 20, alert: "Clear" },
-  { name: "Trincomalee", temp: 34, status: "elevated", aqi: 85, alert: "Heat Advisory" },
-  { name: "Ratnapura", temp: 30, status: "danger", aqi: 55, alert: "Flash Flood Risk" },
-];
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "safe": return "bg-safe/20 text-safe border-safe/50";
-    case "warning": return "bg-warning/20 text-warning border-warning/50";
-    case "elevated": return "bg-elevated/20 text-elevated border-elevated/50";
-    case "danger": return "bg-danger/20 text-danger border-danger/50";
-    case "extreme": return "bg-extreme/20 text-extreme border-extreme/50";
-    default: return "bg-primary/20 text-primary border-primary/50";
-  }
-};
-
-const getStatusDot = (status: string) => {
-  switch (status) {
-    case "safe": return "bg-safe";
-    case "warning": return "bg-warning";
-    case "elevated": return "bg-elevated";
-    case "danger": return "bg-danger";
-    case "extreme": return "bg-extreme";
-    default: return "bg-primary";
-  }
-};
-
-export default function LankaClimateHub() {
-  const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
+// Simulated Dynamic Stats
+const useDynamicStats = () => {
+  const [stats, setStats] = useState({
+    temp: 29.4,
+    highTemp: 34.2,
+    rainfall: 12.5,
+    humidity: 78,
+    windSpeed: 14,
+    aqi: 45,
+    uv: 8,
+    alerts: 3
+  });
 
   useEffect(() => {
-    setMounted(true);
+    const interval = setInterval(() => {
+      setStats(prev => ({
+        ...prev,
+        temp: +(prev.temp + (Math.random() - 0.5) * 0.2).toFixed(1),
+        humidity: Math.max(0, Math.min(100, Math.round(prev.humidity + (Math.random() - 0.5) * 2))),
+        windSpeed: Math.max(0, +(prev.windSpeed + (Math.random() - 0.5)).toFixed(1)),
+      }));
+    }, 3000);
+    return () => clearInterval(interval);
   }, []);
+
+  return stats;
+};
+
+// Weather Particles component
+const WeatherParticles = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30 z-0">
+      {[...Array(20)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute bg-white/20 rounded-full"
+          style={{
+            width: Math.random() * 4 + 1 + 'px',
+            height: Math.random() * 4 + 1 + 'px',
+            left: Math.random() * 100 + '%',
+            top: -10,
+          }}
+          animate={{
+            y: ['0vh', '100vh'],
+            x: [(Math.random() - 0.5) * 50, (Math.random() - 0.5) * 100],
+            opacity: [0, 1, 0],
+          }}
+          transition={{
+            duration: Math.random() * 10 + 10,
+            repeat: Infinity,
+            ease: "linear",
+            delay: Math.random() * 20,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+export default function LandingPage() {
+  const stats = useDynamicStats();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen flex flex-col p-4 md:p-6 lg:p-8 space-y-6">
-      {/* Header */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 z-10"
-      >
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-            <Globe className="text-white h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-white">Lanka Climate Hub</h1>
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">National Intelligence Platform</p>
-          </div>
-        </div>
-
-        <div className="flex-1 max-w-md mx-auto sm:mx-8 relative w-full">
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search regions, parameters, stations..."
-              className="w-full bg-black/20 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all backdrop-blur-md"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/20 border border-white/5 mr-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-safe opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-safe"></span>
-            </span>
-            <span className="text-xs font-medium text-white/90">System Online</span>
-          </div>
-          <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/10 text-white">
-            <Bell className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="rounded-full hover:bg-white/10 text-white">
-            <Settings className="h-5 w-5" />
-          </Button>
-        </div>
-      </motion.header>
-
-      {/* Main Grid Layout */}
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 z-10">
-        
-        {/* Left Sidebar - Navigation & Quick Stats */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-          className="lg:col-span-3 space-y-6 flex flex-col"
-        >
-          <Card className="glass-card border-none flex-1">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg text-white">Active Monitors</CardTitle>
-              <CardDescription>Real-time sensor network status</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {regions.map((region, i) => (
-                <motion.div
-                  key={region.name}
-                  whileHover={{ scale: 1.02, x: 5 }}
-                  className="flex items-center justify-between p-3 rounded-xl bg-black/20 border border-white/5 cursor-pointer transition-all hover:bg-white/5"
-                >
-                  <div className="flex flex-col">
-                    <span className="font-medium text-white/90">{region.name}</span>
-                    <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                      <div className={`w-1.5 h-1.5 rounded-full ${getStatusDot(region.status)}`} />
-                      {region.alert}
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-end">
-                    <span className="font-bold text-white">{region.temp}°C</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full mt-1 border uppercase tracking-wider font-semibold ${getStatusColor(region.status)}`}>
-                      AQI {region.aqi}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Center - Map / Main Vis */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          className="lg:col-span-6 flex flex-col h-full min-h-[500px]"
-        >
-          <div className="glass rounded-2xl flex-1 relative overflow-hidden flex flex-col p-1 border-white/10 border">
-            {/* Nav Tabs overlaying Map */}
-            <div className="absolute top-4 left-4 z-20 flex gap-2 p-1 bg-black/40 backdrop-blur-md rounded-lg border border-white/10">
-              {['Overview', 'Radar', 'Wind', 'Satellite'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab.toLowerCase())}
-                  className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                    activeTab === tab.toLowerCase()
-                      ? 'bg-primary text-white shadow-md'
-                      : 'text-white/60 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-
-            {/* Faux Interactive Map Background */}
-            <div className="absolute inset-0 bg-[#0F172A] flex items-center justify-center overflow-hidden rounded-xl">
-              <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] mix-blend-screen" />
-              
-              {/* Dynamic Island Outline (Faux Sri Lanka) */}
-              <motion.div 
-                className="relative w-full h-full flex items-center justify-center opacity-80"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 0.8 }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-              >
-                 <svg width="400" height="600" viewBox="0 0 200 300" className="drop-shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-                  <path 
-                    d="M 100 20 C 130 50, 160 100, 140 180 C 120 260, 90 280, 80 280 C 60 280, 50 250, 40 200 C 30 150, 50 80, 100 20 Z" 
-                    fill="#1E293B" 
-                    stroke="#38BDF8" 
-                    strokeWidth="1.5"
-                    strokeDasharray="4 4"
-                    className="animate-[dash_10s_linear_infinite]"
-                  />
-                  {/* Heatmap overlay spots */}
-                  <circle cx="100" cy="80" r="15" fill="#EF4444" opacity="0.3" filter="blur(8px)" />
-                  <circle cx="80" cy="180" r="25" fill="#F97316" opacity="0.3" filter="blur(12px)" />
-                  <circle cx="120" cy="220" r="20" fill="#10B981" opacity="0.3" filter="blur(10px)" />
-                  
-                  {/* Node points */}
-                  <circle cx="100" cy="80" r="3" fill="#FFFFFF" />
-                  <circle cx="80" cy="180" r="3" fill="#FFFFFF" />
-                  <circle cx="120" cy="220" r="3" fill="#FFFFFF" />
-                  <circle cx="60" cy="140" r="3" fill="#FFFFFF" />
-                </svg>
-              </motion.div>
-
-              {/* Data Overlay Cards on Map */}
-              <motion.div 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="absolute bottom-4 right-4 glass-card p-4 rounded-xl max-w-[200px]"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <Zap className="h-4 w-4 text-warning" />
-                  <span className="text-sm font-semibold text-white">Live Alert</span>
-                </div>
-                <p className="text-xs text-white/80 leading-relaxed">
-                  High precipitation detected in Southwestern quadrant. Flash flood risks elevated.
-                </p>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Right Sidebar - Analytics */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="lg:col-span-3 space-y-6"
-        >
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="glass-card border-none bg-primary/10">
-              <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                <ThermometerSun className="h-6 w-6 text-warning mb-2" />
-                <span className="text-2xl font-bold text-white">31°</span>
-                <span className="text-xs text-white/60">Avg Temp</span>
-              </CardContent>
-            </Card>
-            <Card className="glass-card border-none bg-secondary/10">
-              <CardContent className="p-4 flex flex-col items-center justify-center text-center">
-                <Droplets className="h-6 w-6 text-secondary mb-2" />
-                <span className="text-2xl font-bold text-white">78%</span>
-                <span className="text-xs text-white/60">Humidity</span>
-              </CardContent>
-            </Card>
-            <Card className="glass-card border-none col-span-2 relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-danger/20 to-danger/5 opacity-50 group-hover:opacity-100 transition-opacity" />
-              <CardContent className="p-5 flex items-center justify-between relative z-10">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <AlertTriangle className="h-4 w-4 text-danger" />
-                    <span className="font-semibold text-danger">Severe Weather</span>
-                  </div>
-                  <span className="text-sm text-white/80">Monsoon Depression Active</span>
-                </div>
-                <Button size="sm" variant="destructive" className="rounded-full px-4 text-xs font-semibold">
-                  Details
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Card className="glass-card border-none">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                <Activity className="h-4 w-4" /> Predictive Index
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-white">Flood Risk</span>
-                    <span className="text-danger font-medium">85%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: "85%" }}
-                      transition={{ duration: 1, delay: 0.5 }}
-                      className="h-full bg-danger rounded-full" 
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-white">Landslide Probability</span>
-                    <span className="text-warning font-medium">60%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: "60%" }}
-                      transition={{ duration: 1, delay: 0.6 }}
-                      className="h-full bg-warning rounded-full" 
-                    />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-white">Air Quality Stress</span>
-                    <span className="text-safe font-medium">20%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: "20%" }}
-                      transition={{ duration: 1, delay: 0.7 }}
-                      className="h-full bg-safe rounded-full" 
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* Bottom - Charts */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="glass rounded-2xl p-6 z-10 border border-white/5"
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-white">24-Hour Metereological Trends</h3>
-          <div className="flex gap-2">
-             <Button variant="outline" size="sm" className="bg-black/20 border-white/10 text-white hover:bg-white/10">Temperature</Button>
-             <Button variant="outline" size="sm" className="bg-black/20 border-white/10 text-white/50 hover:bg-white/10 hover:text-white">Precipitation</Button>
-          </div>
-        </div>
-        <div className="h-[200px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={climateData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#38BDF8" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#38BDF8" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-              <XAxis dataKey="time" stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
-              <RechartsTooltip 
-                contentStyle={{ backgroundColor: '#1E293B', borderColor: '#334155', borderRadius: '8px', color: '#fff' }}
-                itemStyle={{ color: '#38BDF8' }}
+    <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
+      <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-20 pb-16 overflow-hidden">
+        {/* Animated Map Background */}
+        <div className="absolute inset-0 z-0 flex items-center justify-center opacity-30">
+          <motion.div 
+            className="w-[800px] h-[1000px] absolute"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 2, ease: "easeOut" }}
+          >
+             <svg viewBox="0 0 200 300" className="w-full h-full drop-shadow-[0_0_50px_rgba(37,99,235,0.4)]">
+              <path 
+                d="M 100 20 C 130 50, 160 100, 140 180 C 120 260, 90 280, 80 280 C 60 280, 50 250, 40 200 C 30 150, 50 80, 100 20 Z" 
+                fill="none" 
+                stroke="#38BDF8" 
+                strokeWidth="0.5"
+                className="animate-[dash_20s_linear_infinite]"
+                strokeDasharray="4 4"
               />
-              <Area type="monotone" dataKey="temp" stroke="#38BDF8" strokeWidth={3} fillOpacity={1} fill="url(#colorTemp)" />
-            </AreaChart>
-          </ResponsiveContainer>
+              <path 
+                d="M 100 20 C 130 50, 160 100, 140 180 C 120 260, 90 280, 80 280 C 60 280, 50 250, 40 200 C 30 150, 50 80, 100 20 Z" 
+                fill="url(#mapGrad)" 
+                opacity="0.2"
+              />
+              <defs>
+                <radialGradient id="mapGrad" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#2563EB" />
+                  <stop offset="100%" stopColor="#0F172A" />
+                </radialGradient>
+              </defs>
+            </svg>
+          </motion.div>
+          {/* Subtle Radar sweep */}
+          <motion.div 
+            className="absolute inset-0 origin-center rounded-full border-t border-primary/20 bg-gradient-to-t from-transparent to-primary/5"
+            style={{ width: '150vh', height: '150vh' }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          />
         </div>
-      </motion.div>
+        
+        <WeatherParticles />
+
+        <div className="relative z-10 max-w-5xl mx-auto px-4 text-center space-y-8 mt-12">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <span className="inline-block py-1.5 px-4 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-6 uppercase tracking-widest backdrop-blur-md">
+              National Environmental Platform
+            </span>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight">
+              Real-Time <span className="text-gradient">Climate Intelligence</span><br/> for Sri Lanka
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+              Monitor weather patterns, climate change anomalies, El Niño impacts, environmental conditions, and disaster risks from a single, unified enterprise platform.
+            </p>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+          >
+            <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-semibold rounded-full bg-primary hover:bg-primary/90 text-white shadow-[0_0_20px_rgba(37,99,235,0.4)] group" asChild>
+              <Link href="/map">
+                Explore Live Map 
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </Button>
+            <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-base font-semibold rounded-full border-white/20 bg-black/40 backdrop-blur-md text-white hover:bg-white/10" asChild>
+              <Link href="/weather">
+                <Cloud className="mr-2 h-5 w-5" /> View Weather
+              </Link>
+            </Button>
+          </motion.div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <motion.div 
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 text-white/50 flex flex-col items-center gap-2"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <span className="text-xs uppercase tracking-widest font-medium">Scroll Data</span>
+          <div className="w-[1px] h-12 bg-gradient-to-b from-white/50 to-transparent" />
+        </motion.div>
+      </section>
+
+      {/* Dynamic Statistics Strip */}
+      <section className="relative z-20 -mt-8 px-4 md:px-8 max-w-[1400px] mx-auto w-full">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-4">
+          <StatCard title="National Avg" value={`${stats.temp}°C`} icon={ThermometerSun} color="text-warning" />
+          <StatCard title="Highest Today" value={`${stats.highTemp}°C`} icon={Sun} color="text-danger" />
+          <StatCard title="Rainfall" value={`${stats.rainfall}mm`} icon={CloudRain} color="text-primary" />
+          <StatCard title="Humidity" value={`${stats.humidity}%`} icon={Droplets} color="text-secondary" />
+          <StatCard title="Wind Speed" value={`${stats.windSpeed} km/h`} icon={Wind} color="text-muted-foreground" />
+          <StatCard title="Air Quality" value={stats.aqi} icon={Activity} color="text-safe" subtitle="Good" />
+          <StatCard title="UV Index" value={stats.uv} icon={Sun} color="text-warning" subtitle="High" />
+          <StatCard title="Active Alerts" value={stats.alerts} icon={AlertTriangle} color="text-danger" alert />
+        </div>
+      </section>
+
+      {/* Why Lanka Climate Hub */}
+      <section className="py-24 px-4 md:px-8 max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">Enterprise-Grade Architecture</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">Designed for national resilience, providing unparalleled access to critical environmental data and predictive modeling.</p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          <FeatureCard 
+            icon={Database} 
+            title="Unified Data Lake" 
+            description="Aggregates satellite telemetry, ground sensors, and marine buoys into a single truth-source."
+          />
+          <FeatureCard 
+            icon={Zap} 
+            title="Real-Time Processing" 
+            description="Sub-second latency on severe weather updates and intelligence dashboard rendering."
+          />
+          <FeatureCard 
+            icon={ShieldCheck} 
+            title="Government Grade" 
+            description="Built securely to handle sensitive national disaster frameworks and emergency protocols."
+          />
+        </div>
+      </section>
+
+      {/* Sector Deep Dives */}
+      <section className="py-24 relative overflow-hidden bg-[#1E293B]/20 border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Intelligence Across Sectors</h2>
+              <p className="text-muted-foreground max-w-xl">Dedicated environments tailored for specific national industries and monitoring requirements.</p>
+            </div>
+            <Button variant="link" className="text-primary" asChild>
+              <Link href="/intelligence">View All Sectors <ChevronRight className="ml-1 h-4 w-4" /></Link>
+            </Button>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <SectorCard href="/disaster" icon={AlertTriangle} title="Disaster Preparedness" color="from-danger/20 to-danger/5" />
+            <SectorCard href="/agriculture" icon={Sprout} title="Agriculture Support" color="from-safe/20 to-safe/5" />
+            <SectorCard href="/environment" icon={TreePine} title="Environmental Monitoring" color="from-primary/20 to-primary/5" />
+            <SectorCard href="/map" icon={BarChart3} title="Real-time Analytics" color="from-secondary/20 to-secondary/5" />
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-32 px-4 text-center relative z-10">
+        <div className="max-w-3xl mx-auto glass p-12 rounded-3xl border border-white/10 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent" />
+          <Globe className="h-16 w-16 text-primary mx-auto mb-6 opacity-80" />
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to explore the data?</h2>
+          <p className="text-muted-foreground mb-8 text-lg">Access Sri Lanka's most comprehensive climate and environmental intelligence platform today.</p>
+          <Button size="lg" className="rounded-full h-12 px-8 bg-white text-black hover:bg-white/90 font-bold">
+            Open Dashboard
+          </Button>
+        </div>
+      </section>
     </div>
+  );
+}
+
+// Subcomponents
+
+function StatCard({ title, value, icon: Icon, color, subtitle, alert }: any) {
+  return (
+    <motion.div 
+      whileHover={{ y: -5 }}
+      className={`glass-card rounded-2xl p-4 flex flex-col justify-between border ${alert ? 'border-danger/50 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'border-white/5'}`}
+    >
+      <div className="flex justify-between items-start mb-4">
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</span>
+        <Icon className={`h-4 w-4 ${color}`} />
+      </div>
+      <div>
+        <div className="flex items-baseline gap-2">
+          <span className="text-xl md:text-2xl font-bold text-white tracking-tight">{value}</span>
+          {subtitle && <span className={`text-xs font-semibold ${color}`}>{subtitle}</span>}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function FeatureCard({ icon: Icon, title, description }: any) {
+  return (
+    <Card className="glass-card border-none bg-black/20 hover:bg-white/5 transition-colors duration-500">
+      <CardContent className="p-8">
+        <div className="h-12 w-12 rounded-2xl bg-primary/20 flex items-center justify-center mb-6 border border-primary/30">
+          <Icon className="h-6 w-6 text-primary" />
+        </div>
+        <h3 className="text-xl font-bold text-white mb-3">{title}</h3>
+        <p className="text-muted-foreground leading-relaxed text-sm">{description}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SectorCard({ href, icon: Icon, title, color }: any) {
+  return (
+    <Link href={href} className="group block">
+      <Card className={`glass border-white/5 relative overflow-hidden h-full transition-all duration-300 hover:border-white/20 hover:-translate-y-1`}>
+        <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-20 group-hover:opacity-40 transition-opacity`} />
+        <CardContent className="p-6 flex flex-col items-start relative z-10 h-full">
+          <Icon className="h-8 w-8 text-white mb-auto pb-4" />
+          <h3 className="text-lg font-bold text-white mt-8 group-hover:text-primary transition-colors">{title}</h3>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
