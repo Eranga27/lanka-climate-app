@@ -6,13 +6,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import ReactECharts from "echarts-for-react";
 import { motion } from "framer-motion";
 import { Anchor, Waves, Wind, Thermometer, Navigation, AlertTriangle, Ship, Fish } from "lucide-react";
+import { getMarineData, getWeatherData } from "@/lib/weather";
+import { SkeletonCard, ErrorState } from "@/components/ui/shared";
 
 const HARBOURS = [
-  { name: "Colombo", condition: "Good", wind: "12 knots", wave: "0.8m", temp: "28°C", status: "safe" },
-  { name: "Galle", condition: "Moderate", wind: "18 knots", wave: "1.5m", temp: "27°C", status: "warning" },
-  { name: "Trincomalee", condition: "Rough", wind: "28 knots", wave: "3.2m", temp: "29°C", status: "danger" },
-  { name: "Jaffna", condition: "Poor", wind: "32 knots", wave: "4.1m", temp: "30°C", status: "elevated" },
-  { name: "Hambantota", condition: "Good", wind: "10 knots", wave: "0.6m", temp: "27°C", status: "safe" },
+  { name: "Colombo", condition: "Good", wind: "12 knots", wave: "0.8m", temp: "28°C", status: "safe", lat: 6.9271, lng: 79.8612 },
+  { name: "Galle", condition: "Moderate", wind: "18 knots", wave: "1.5m", temp: "27°C", status: "warning", lat: 6.0328, lng: 80.2170 },
+  { name: "Trincomalee", condition: "Rough", wind: "28 knots", wave: "3.2m", temp: "29°C", status: "danger", lat: 8.5811, lng: 81.2330 },
+  { name: "Jaffna", condition: "Poor", wind: "32 knots", wave: "4.1m", temp: "30°C", status: "elevated", lat: 9.6615, lng: 80.0255 },
+  { name: "Hambantota", condition: "Good", wind: "10 knots", wave: "0.6m", temp: "27°C", status: "safe", lat: 6.1248, lng: 81.1185 },
 ];
 
 const FISHING_ZONES = [
@@ -22,28 +24,58 @@ const FISHING_ZONES = [
   { zone: "Eastern Coast", viability: "Moderate", risk: "Elevated", season: "Caution" },
 ];
 
-const useMarineLive = () => {
-  const [data, setData] = useState({ waveHeight: 1.8, seaTemp: 28.4, windSpeed: 16.2 });
-  useEffect(() => {
-    const id = setInterval(() => {
-      setData(p => ({
-        waveHeight: +(p.waveHeight + (Math.random() - 0.5) * 0.1).toFixed(2),
-        seaTemp: +(p.seaTemp + (Math.random() - 0.5) * 0.1).toFixed(1),
-        windSpeed: +(p.windSpeed + (Math.random() - 0.5) * 0.5).toFixed(1),
-      }));
-    }, 2500);
-    return () => clearInterval(id);
-  }, []);
-  return data;
-};
-
 const statusColor = (s: string) =>
   s === "safe" ? "text-safe" : s === "warning" ? "text-warning" : s === "elevated" ? "text-elevated" : "text-danger";
 
 export default function MarinePage() {
   const [mounted, setMounted] = useState(false);
-  const live = useMarineLive();
-  useEffect(() => setMounted(true), []);
+  const [marineData, setMarineData] = useState<any>(null);
+  const [weatherData, setWeatherData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    setMounted(true);
+    const fetchLiveMarineData = async () => {
+      try {
+        // Fetch for Colombo as the primary dashboard view
+        const [marine, weather] = await Promise.all([
+          getMarineData(6.9271, 79.8612),
+          getWeatherData(6.9271, 79.8612)
+        ]);
+        setMarineData(marine);
+        setWeatherData(weather);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchLiveMarineData();
+  }, []);
+
+  if (!mounted) return null;
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 space-y-6">
+        <PageHeader title="Marine & Coastal Intelligence" description="Loading real-time marine data..." />
+        <SkeletonCard rows={8} />
+      </div>
+    );
+  }
+
+  if (!marineData || !weatherData) {
+    return (
+      <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 space-y-6">
+        <PageHeader title="Marine & Coastal Intelligence" description="Data unavailable" />
+        <ErrorState title="Marine API Offline" message="Could not connect to Open-Meteo Marine API." />
+      </div>
+    );
+  }
+
+  const currentWaveHeight = marineData.current.wave_height;
+  const currentWindSpeed = weatherData.current.wind_speed_10m;
+  const currentDirection = marineData.current.wave_direction;
 
   const waveOpts = {
     tooltip: { trigger: "axis", backgroundColor: "#1E293B", textStyle: { color: "#fff" } },
@@ -51,7 +83,7 @@ export default function MarinePage() {
     xAxis: {
       type: "category",
       boundaryGap: false,
-      data: ["00:00", "03:00", "06:00", "09:00", "12:00", "15:00", "18:00", "21:00", "24:00"],
+      data: marineData.hourly.time.slice(0, 24).map((t: string) => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric' })),
       axisLine: { lineStyle: { color: "#334155" } },
       axisLabel: { color: "#94A3B8" },
     },
@@ -66,7 +98,7 @@ export default function MarinePage() {
         name: "Wave Height",
         type: "line",
         smooth: true,
-        data: [1.2, 1.4, 1.8, 2.2, live.waveHeight, 2.8, 3.2, 2.6, 2.0],
+        data: marineData.hourly.wave_height.slice(0, 24),
         itemStyle: { color: "#38BDF8" },
         areaStyle: {
           color: { type: "linear", x: 0, y: 0, x2: 0, y2: 1, colorStops: [{ offset: 0, color: "rgba(56,189,248,0.4)" }, { offset: 1, color: "rgba(56,189,248,0)" }] },
@@ -135,8 +167,6 @@ export default function MarinePage() {
     ],
   };
 
-  if (!mounted) return null;
-
   return (
     <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 space-y-6">
       <PageHeader
@@ -161,10 +191,10 @@ export default function MarinePage() {
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <MarineKPI title="Avg Wave Height" value={`${live.waveHeight}m`} icon={Waves} color="text-secondary" />
-        <MarineKPI title="Sea Temperature" value={`${live.seaTemp}°C`} icon={Thermometer} color="text-warning" />
-        <MarineKPI title="Wind Speed" value={`${live.windSpeed} kn`} icon={Wind} color="text-muted-foreground" />
-        <MarineKPI title="Current Direction" value="NNE 220°" icon={Navigation} color="text-primary" />
+        <MarineKPI title="Colombo Wave Height" value={`${currentWaveHeight}m`} icon={Waves} color="text-secondary" />
+        <MarineKPI title="Air Temperature" value={`${weatherData.current.temperature_2m}°C`} icon={Thermometer} color="text-warning" />
+        <MarineKPI title="Wind Speed" value={`${currentWindSpeed} km/h`} icon={Wind} color="text-muted-foreground" />
+        <MarineKPI title="Wave Direction" value={`${currentDirection}°`} icon={Navigation} color="text-primary" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -173,11 +203,11 @@ export default function MarinePage() {
           <CardContent className="p-6">
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Waves className="h-5 w-5 text-secondary" /> 24-Hour Wave Forecast
+                <Waves className="h-5 w-5 text-secondary" /> 24-Hour Wave Forecast (Colombo)
               </h3>
-              <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded font-semibold">Live Buoy Data</span>
+              <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded font-semibold">Live API Data</span>
             </div>
-            <p className="text-xs text-muted-foreground mb-4">Significant wave height aggregated from offshore buoy network.</p>
+            <p className="text-xs text-muted-foreground mb-4">Significant wave height predictions powered by Open-Meteo Marine.</p>
             <div className="h-[220px] w-full">
               <ReactECharts option={waveOpts} style={{ height: "100%", width: "100%" }} />
             </div>

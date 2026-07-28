@@ -46,3 +46,39 @@ export async function getWeatherData(lat: number, lng: number) {
     return null;
   }
 }
+
+export async function getMarineData(lat: number, lng: number) {
+  try {
+    const params = new URLSearchParams({
+      latitude: lat.toString(),
+      longitude: lng.toString(),
+      current: "wave_height,wave_direction,wave_period",
+      hourly: "wave_height,wave_direction,wave_period",
+      timezone: "auto",
+    });
+
+    const response = await fetch(`https://marine-api.open-meteo.com/v1/marine?${params}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching marine data:", error);
+    return null;
+  }
+}
+
+export async function getAirQualityData(lat: number, lng: number) {
+  try {
+    const params = new URLSearchParams({
+      latitude: lat.toString(),
+      longitude: lng.toString(),
+      current: "european_aqi,pm10,pm2_5,carbon_monoxide,nitrogen_dioxide,sulphur_dioxide,ozone,dust",
+      hourly: "european_aqi,pm10,pm2_5",
+      timezone: "auto",
+    });
+
+    const response = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?${params}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching air quality data:", error);
+    return null;
+  }
+}

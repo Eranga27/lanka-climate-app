@@ -8,59 +8,79 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ReactECharts from "echarts-for-react";
-import { motion } from "framer-motion";
-
-// Helper for dynamic simulated data
-const useEnvironmentalData = () => {
-  const [data, setData] = useState({
-    aqi: 42,
-    waterPurity: 94,
-    riverLevel: 5.2,
-    reservoirCap: 78,
-  });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setData(prev => ({
-        ...prev,
-        aqi: Math.max(0, Math.round(prev.aqi + (Math.random() - 0.5) * 5)),
-        riverLevel: +(prev.riverLevel + (Math.random() - 0.5) * 0.1).toFixed(2),
-      }));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return data;
-};
+import { getAirQualityData } from "@/lib/weather";
+import { SkeletonCard, ErrorState } from "@/components/ui/shared";
 
 export default function EnvironmentPage() {
   const [mounted, setMounted] = useState(false);
-  const liveData = useEnvironmentalData();
+  const [aqiData, setAqiData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    const fetchAqi = async () => {
+      try {
+        const data = await getAirQualityData(6.9271, 79.8612); // Colombo
+        if (data) {
+          setAqiData(data);
+        } else {
+          setError("Failed to fetch air quality data");
+        }
+      } catch (err) {
+        setError("Error connecting to AQI service");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAqi();
+  }, []);
 
-  // --- ECharts Configurations ---
+  if (!mounted) return null;
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 space-y-6">
+        <PageHeader title="Environmental Intelligence" description="Loading real-time environmental telemetry..." />
+        <SkeletonCard rows={10} />
+      </div>
+    );
+  }
+
+  if (error || !aqiData) {
+    return (
+      <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 space-y-6">
+        <PageHeader title="Environmental Intelligence" description="Data unavailable" />
+        <ErrorState title="Telemetry Offline" message={error || "Could not connect to Open-Meteo Air Quality API."} />
+      </div>
+    );
+  }
+
+  const currentAqi = aqiData.current.european_aqi;
+  const pm10 = aqiData.current.pm10;
+  const pm25 = aqiData.current.pm2_5;
+  const ozone = aqiData.current.ozone;
 
   // 1. Air Quality Gauge
   const aqiOptions = {
     tooltip: { formatter: '{a} <br/>{b} : {c}' },
     series: [
       {
-        name: 'AQI',
+        name: 'European AQI',
         type: 'gauge',
         startAngle: 180, endAngle: 0,
         center: ['50%', '75%'], radius: '100%',
-        min: 0, max: 300,
-        splitNumber: 6,
+        min: 0, max: 100, // European AQI typically 0-100
+        splitNumber: 5,
         axisLine: {
           lineStyle: {
             width: 15,
             color: [
-              [0.16, '#10B981'], // Safe
-              [0.33, '#EAB308'], // Warning
-              [0.5, '#F97316'],  // Elevated
-              [0.66, '#EF4444'], // Danger
-              [1, '#8B5CF6']     // Extreme
+              [0.2, '#10B981'], // Good
+              [0.4, '#EAB308'], // Fair
+              [0.6, '#F97316'], // Moderate
+              [0.8, '#EF4444'], // Poor
+              [1, '#8B5CF6']    // Very Poor
             ]
           }
         },
@@ -70,7 +90,7 @@ export default function EnvironmentPage() {
         axisLabel: { color: '#94A3B8', distance: -40, fontSize: 10 },
         title: { offsetCenter: [0, '-20%'], fontSize: 14, color: '#94A3B8' },
         detail: { fontSize: 30, offsetCenter: [0, '0%'], valueAnimation: true, formatter: '{value}', color: '#fff', fontWeight: 'bold' },
-        data: [{ value: liveData.aqi, name: 'PM2.5 Index' }]
+        data: [{ value: currentAqi, name: 'European AQI' }]
       }
     ]
   };
@@ -82,7 +102,7 @@ export default function EnvironmentPage() {
     xAxis: { type: 'category', data: ['Victoria', 'Randenigala', 'Kotmale', 'Samanala', 'Castlereagh'], axisLine: { lineStyle: { color: '#334155' } }, axisLabel: { color: '#94A3B8', interval: 0, rotate: 30 } },
     yAxis: { type: 'value', max: 100, axisLine: { show: false }, splitLine: { lineStyle: { color: '#334155', type: 'dashed' } }, axisLabel: { formatter: '{value}%', color: '#94A3B8' } },
     series: [{
-      data: [85, 78, 92, liveData.reservoirCap, 65],
+      data: [85, 78, 92, 72, 65],
       type: 'bar',
       barWidth: '40%',
       itemStyle: {
@@ -131,17 +151,17 @@ export default function EnvironmentPage() {
     ]
   };
 
-  // 5. Water Quality Radar
-  const waterQualityOptions = {
+  // 5. Pollutants Radar
+  const pollutantsRadar = {
     tooltip: { backgroundColor: '#1E293B', textStyle: { color: '#fff' } },
     radar: {
       indicator: [
-        { name: 'pH Level', max: 100 },
-        { name: 'Turbidity', max: 100 },
-        { name: 'Dissolved Oxygen', max: 100 },
-        { name: 'Conductivity', max: 100 },
-        { name: 'Nitrates', max: 100 },
-        { name: 'Heavy Metals', max: 100 }
+        { name: 'PM10', max: 100 },
+        { name: 'PM2.5', max: 100 },
+        { name: 'Ozone', max: 100 },
+        { name: 'CO', max: 1000 },
+        { name: 'NO2', max: 100 },
+        { name: 'SO2', max: 100 }
       ],
       axisName: { color: '#94A3B8', fontSize: 10 },
       splitLine: { lineStyle: { color: ['#334155'] } },
@@ -150,17 +170,19 @@ export default function EnvironmentPage() {
     },
     series: [
       {
-        name: 'National River Avg vs Target',
+        name: 'Colombo Pollutants',
         type: 'radar',
         data: [
-          { value: [85, 90, 75, 80, 60, 95], name: 'Current Avg', itemStyle: { color: '#38BDF8' }, areaStyle: { opacity: 0.3 } },
-          { value: [100, 100, 100, 100, 100, 100], name: 'Safe Target', itemStyle: { color: '#10B981' }, lineStyle: { type: 'dashed' } }
+          { 
+            value: [pm10, pm25, ozone, aqiData.current.carbon_monoxide, aqiData.current.nitrogen_dioxide, aqiData.current.sulphur_dioxide], 
+            name: 'Current Levels', 
+            itemStyle: { color: '#38BDF8' }, 
+            areaStyle: { opacity: 0.3 } 
+          }
         ]
       }
     ]
   };
-
-  if (!mounted) return null;
 
   return (
     <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 space-y-6">
@@ -172,9 +194,9 @@ export default function EnvironmentPage() {
 
       {/* Top Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        <StatCard title="National AQI" value={liveData.aqi} unit="PM2.5" icon={Wind} color="text-safe" />
-        <StatCard title="Water Purity Index" value={liveData.waterPurity} unit="%" icon={Droplets} color="text-primary" />
-        <StatCard title="Kelani River Lvl" value={liveData.riverLevel} unit="m" icon={Waves} color="text-secondary" />
+        <StatCard title="National AQI" value={currentAqi} unit="EAQI" icon={Wind} color="text-safe" />
+        <StatCard title="PM 2.5 Level" value={pm25} unit="μg/m³" icon={Activity} color="text-warning" />
+        <StatCard title="Ozone Level" value={ozone} unit="μg/m³" icon={Wind} color="text-secondary" />
         <StatCard title="Forest Cover" value="29.7" unit="%" icon={Leaf} color="text-safe" />
         <StatCard title="Avg Sea Lvl Rise" value="+3.2" unit="mm/yr" icon={TrendingUp} color="text-danger" className="col-span-2 md:col-span-4 lg:col-span-1" />
       </div>
@@ -185,9 +207,9 @@ export default function EnvironmentPage() {
         <Card className="glass-card border-white/5 lg:col-span-1 flex flex-col">
           <CardContent className="p-6 flex-1 flex flex-col">
             <h3 className="font-semibold text-white text-lg flex items-center gap-2 mb-2">
-              <Wind className="h-5 w-5 text-safe" /> Live Air Quality (AQI)
+              <Wind className="h-5 w-5 text-safe" /> Live Air Quality (Colombo)
             </h3>
-            <p className="text-xs text-muted-foreground mb-6">Aggregated from 15 national monitoring stations.</p>
+            <p className="text-xs text-muted-foreground mb-6">Real-time European AQI fetched from Open-Meteo.</p>
             <div className="flex-1 min-h-[200px] -mt-4">
               <ReactECharts option={aqiOptions} style={{ height: '100%', width: '100%' }} />
             </div>
@@ -201,7 +223,6 @@ export default function EnvironmentPage() {
               <h3 className="font-semibold text-white text-lg flex items-center gap-2">
                 <ShieldCheck className="h-5 w-5 text-primary" /> Major Reservoir Capacities
               </h3>
-              <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs font-semibold">Live Telemetry</span>
             </div>
             <p className="text-xs text-muted-foreground mb-4">Tracking hydroelectric and irrigation storage levels against maximum capacity.</p>
             <div className="flex-1 min-h-[250px]">
@@ -227,15 +248,15 @@ export default function EnvironmentPage() {
           </CardContent>
         </Card>
 
-        {/* Water Quality (Radar) */}
+        {/* Pollutants (Radar) */}
         <Card className="glass-card border-white/5 lg:col-span-1">
           <CardContent className="p-6 flex flex-col h-full">
             <h3 className="font-semibold text-white text-lg flex items-center gap-2 mb-2">
-              <Activity className="h-5 w-5 text-secondary" /> River Water Quality
+              <Activity className="h-5 w-5 text-secondary" /> Atmospheric Pollutants
             </h3>
-            <p className="text-xs text-muted-foreground mb-4">Multivariate analysis of major river basins.</p>
+            <p className="text-xs text-muted-foreground mb-4">Real-time breakdown of major air pollutants (μg/m³).</p>
             <div className="flex-1 min-h-[250px]">
-              <ReactECharts option={waterQualityOptions} style={{ height: '100%', width: '100%' }} />
+              <ReactECharts option={pollutantsRadar} style={{ height: '100%', width: '100%' }} />
             </div>
           </CardContent>
         </Card>
