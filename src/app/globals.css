@@ -164,9 +164,8 @@
 
 /* Fix Leaflet map sizing issues in Next.js + Tailwind */
 .leaflet-container {
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 400px;
+  width: 100vw !important;
+  height: 100vh !important;
   z-index: 0;
 }
 /* Fix leaflet images getting squished by tailwind base styles */

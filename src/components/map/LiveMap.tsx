@@ -249,20 +249,29 @@ export default function LiveMap() {
             </>
           )}
 
-          {/* Simulated Animated Radar Overlay (when Temp/Rain layers are active) */}
+          {/* Rainfall Radar Simulation */}
           {activeLayers.includes("rain") && (
-            <div className="leaflet-pane leaflet-overlay-pane pointer-events-none opacity-40 mix-blend-screen transition-opacity duration-1000">
-               {/* This is a simulated visual overlay using SVG for the map */}
-               <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full">
-                  <circle cx="50" cy="50" r="30" fill="url(#rainRad)" className="animate-pulse" />
-                  <defs>
-                    <radialGradient id="rainRad">
-                      <stop offset="0%" stopColor="#2563EB" />
-                      <stop offset="100%" stopColor="transparent" />
-                    </radialGradient>
-                  </defs>
-               </svg>
-            </div>
+            <>
+              {/* Rain cells over central and south-west regions */}
+              <Circle 
+                center={[6.8, 80.3]} 
+                radius={40000} 
+                pathOptions={{ color: '#3B82F6', fillColor: '#3B82F6', fillOpacity: 0.4, weight: 0 }} 
+                className="animate-pulse"
+              />
+              <Circle 
+                center={[7.2, 80.6]} 
+                radius={25000} 
+                pathOptions={{ color: '#2563EB', fillColor: '#2563EB', fillOpacity: 0.5, weight: 0 }} 
+                className="animate-pulse"
+              />
+              <Circle 
+                center={[6.3, 80.2]} 
+                radius={35000} 
+                pathOptions={{ color: '#60A5FA', fillColor: '#60A5FA', fillOpacity: 0.3, weight: 0 }} 
+                className="animate-pulse"
+              />
+            </>
           )}
         </MapContainer>
 
