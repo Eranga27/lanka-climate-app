@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { getBatchWeatherData } from "@/lib/weather";
+import { getWeatherData } from "@/lib/weather";
 import { Loader2 } from "lucide-react";
 
 // Fix leaflet default icon issue in Next.js
@@ -102,40 +102,38 @@ function MapController({ center, zoom }: { center: [number, number], zoom: numbe
 export default function LiveMap() {
   const [baseMap, setBaseMap] = useState<keyof typeof BASE_MAPS>("satellite");
   const [activeLayers, setActiveLayers] = useState<string[]>(["temp"]);
-  const [selectedDistrict, setSelectedDistrict] = useState<typeof DISTRICTS[0] | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<typeof INITIAL_DISTRICTS[0] | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([7.8731, 80.7718]);
   const [mapZoom, setMapZoom] = useState(7);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [districtsData, setDistrictsData] = useState(INITIAL_DISTRICTS);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch real-time data
+  // Fetch real-time data in parallel — each district is a separate tiny API call
   useEffect(() => {
     async function fetchLiveMapData() {
       setIsLoading(true);
-      const lats = INITIAL_DISTRICTS.map(d => d.lat);
-      const lngs = INITIAL_DISTRICTS.map(d => d.lng);
-      
-      const data = await getBatchWeatherData(lats, lngs);
-      
-      if (data) {
-        const isArray = Array.isArray(data);
-        
-        const updated = INITIAL_DISTRICTS.map((d, index) => {
-          const locationData = isArray ? data[index] : data;
-          
-          if (locationData && locationData.current) {
+      try {
+        const results = await Promise.all(
+          INITIAL_DISTRICTS.map(d => getWeatherData(d.lat, d.lng))
+        );
+        const updated = INITIAL_DISTRICTS.map((d, i) => {
+          const r = results[i];
+          if (r && r.current) {
             return {
               ...d,
-              temp: Math.round(locationData.current.temperature_2m),
-              rain: locationData.current.precipitation,
+              temp: Math.round(r.current.temperature_2m),
+              rain: r.current.precipitation ?? 0,
             };
           }
           return d;
         });
         setDistrictsData(updated);
+      } catch (e) {
+        console.error("Live map fetch error:", e);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
     fetchLiveMapData();
   }, []);
@@ -171,7 +169,7 @@ export default function LiveMap() {
   }, []);
 
   return (
-    <div className={`fixed left-0 right-0 bottom-0 bg-[#0F172A] overflow-hidden ${isFullscreen ? 'top-0 z-[100]' : 'top-16 z-40'}`}>
+    <div className={`fixed left-0 right-0 bottom-0 bg-[#0F172A] overflow-hidden ${isFullscreen ? 'top-0 z-[9999]' : 'top-16 z-40'}`} style={{ top: isFullscreen ? 0 : '4rem' }}>
       
       {isLoading && (
         <div className="absolute inset-0 z-[2000] flex flex-col items-center justify-center bg-[#0F172A]/80 backdrop-blur-sm">

@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "leaflet/dist/leaflet.css";
 import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
+import { LayoutShell } from "@/components/layout/LayoutShell";
 
 export const viewport: Viewport = {
   themeColor: "#0F172A",
@@ -67,10 +67,7 @@ export default function RootLayout({
         style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}
       >
         <Navbar />
-        <main id="main-content" className="flex-1 flex flex-col relative w-full h-full" tabIndex={-1}>
-          {children}
-        </main>
-        <Footer />
+        <LayoutShell>{children}</LayoutShell>
       </body>
     </html>
   );
