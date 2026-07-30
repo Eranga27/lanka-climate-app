@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, ZoomControl, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, ZoomControl, useMap, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { 
@@ -53,7 +53,31 @@ const DISTRICTS = [
   { name: "Trincomalee", lat: 8.5811, lng: 81.2330, temp: 33, rain: 0, aqi: 40, alert: "None" },
   { name: "Nuwara Eliya", lat: 6.9497, lng: 80.7839, temp: 18, rain: 15, aqi: 15, alert: "Heavy Rain" },
   { name: "Ratnapura", lat: 6.6828, lng: 80.3992, temp: 30, rain: 25, aqi: 25, alert: "Flood Warning" },
+  { name: "Anuradhapura", lat: 8.3114, lng: 80.4037, temp: 35, rain: 0, aqi: 35, alert: "Drought Risk" },
+  { name: "Batticaloa", lat: 7.7170, lng: 81.6970, temp: 32, rain: 0, aqi: 32, alert: "None" },
+  { name: "Badulla", lat: 6.9934, lng: 81.0550, temp: 24, rain: 5, aqi: 18, alert: "None" },
+  { name: "Kurunegala", lat: 7.4818, lng: 80.3609, temp: 33, rain: 0, aqi: 42, alert: "None" },
+  { name: "Matara", lat: 5.9549, lng: 80.5420, temp: 30, rain: 10, aqi: 28, alert: "High Surf" },
+  { name: "Puttalam", lat: 8.0330, lng: 79.8260, temp: 34, rain: 0, aqi: 38, alert: "None" },
+  { name: "Hambantota", lat: 6.1248, lng: 81.1185, temp: 32, rain: 0, aqi: 26, alert: "Strong Winds" },
+  { name: "Mannar", lat: 8.9810, lng: 79.9044, temp: 33, rain: 0, aqi: 45, alert: "None" },
 ];
+
+// Custom HTML Bubble Marker
+const createTemperatureIcon = (temp: number, alert: string) => {
+  const isDanger = alert.includes("Warning") || alert.includes("Heavy") || alert.includes("Heat") || alert.includes("Risk");
+  const bgColor = isDanger ? "bg-red-500" : "bg-blue-500/80";
+  const glow = isDanger ? "shadow-[0_0_15px_rgba(239,68,68,0.7)]" : "shadow-[0_0_15px_rgba(59,130,246,0.5)]";
+  
+  return L.divIcon({
+    className: "custom-div-icon bg-transparent border-none",
+    html: `<div class="flex items-center justify-center w-10 h-10 rounded-full ${bgColor} ${glow} text-white font-bold text-sm border-2 border-white/50 backdrop-blur-md transition-transform hover:scale-110">
+             ${temp}°
+           </div>`,
+    iconSize: [40, 40],
+    iconAnchor: [20, 20],
+  });
+};
 
 // Helper to pan to location
 function MapController({ center, zoom }: { center: [number, number], zoom: number }) {
@@ -111,7 +135,7 @@ export default function LiveMap() {
   }, []);
 
   return (
-    <div className={`flex flex-1 w-full h-full relative bg-[#0F172A] ${isFullscreen ? 'fixed inset-0 z-[100]' : 'min-h-[calc(100vh-4rem)] lg:min-h-[calc(100vh)]'}`}>
+    <div className={`absolute inset-0 bg-[#0F172A] overflow-hidden ${isFullscreen ? 'z-[100]' : 'z-0'}`}>
       
       {/* Left Sidebar - Layer Controls */}
       <div className="absolute left-4 top-20 bottom-4 w-64 z-[1000] flex flex-col gap-4 pointer-events-none hidden md:flex">
@@ -165,7 +189,7 @@ export default function LiveMap() {
       </div>
 
       {/* Map Container */}
-      <div className="flex-1 w-full h-full relative z-0">
+      <div className="absolute inset-0 z-0">
         <MapContainer 
           center={[7.8731, 80.7718]} 
           zoom={7} 
@@ -185,6 +209,7 @@ export default function LiveMap() {
             <Marker 
               key={district.name} 
               position={[district.lat, district.lng]}
+              icon={createTemperatureIcon(district.temp, district.alert)}
               eventHandlers={{
                 click: () => handleDistrictClick(district)
               }}
@@ -202,6 +227,28 @@ export default function LiveMap() {
             </Marker>
           ))}
           
+          {/* El Nino / Ocean Temperature Anomalies */}
+          {(activeLayers.includes("oceanTemp") || activeLayers.includes("currents")) && (
+            <>
+              {/* Warm anomaly off the east/south coast */}
+              <Circle 
+                center={[5.5, 82.0]} 
+                radius={150000} 
+                pathOptions={{ color: '#EF4444', fillColor: '#EF4444', fillOpacity: 0.3, weight: 0 }} 
+              />
+              <Circle 
+                center={[4.0, 81.0]} 
+                radius={250000} 
+                pathOptions={{ color: '#F97316', fillColor: '#F97316', fillOpacity: 0.2, weight: 0 }} 
+              />
+              <Circle 
+                center={[7.0, 78.0]} 
+                radius={100000} 
+                pathOptions={{ color: '#3B82F6', fillColor: '#3B82F6', fillOpacity: 0.2, weight: 0 }} 
+              />
+            </>
+          )}
+
           {/* Simulated Animated Radar Overlay (when Temp/Rain layers are active) */}
           {activeLayers.includes("rain") && (
             <div className="leaflet-pane leaflet-overlay-pane pointer-events-none opacity-40 mix-blend-screen transition-opacity duration-1000">
