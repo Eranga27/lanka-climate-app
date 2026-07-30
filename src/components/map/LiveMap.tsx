@@ -61,6 +61,14 @@ function MapController({ center, zoom }: { center: [number, number], zoom: numbe
   useEffect(() => {
     map.flyTo(center, zoom, { animate: true, duration: 1.5 });
   }, [center, zoom, map]);
+
+  useEffect(() => {
+    // Force Leaflet to recalculate container size
+    map.invalidateSize();
+    const timeout = setTimeout(() => map.invalidateSize(), 100);
+    return () => clearTimeout(timeout);
+  }, [map]);
+
   return null;
 }
 
