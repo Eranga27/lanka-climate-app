@@ -11,6 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { getBatchWeatherData } from "@/lib/weather";
+import { Loader2 } from "lucide-react";
+
 // Fix leaflet default icon issue in Next.js
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -45,7 +48,7 @@ const LAYERS = [
   { id: "cyclone", name: "Cyclone Paths", icon: Wind, color: "text-extreme" },
 ];
 
-const DISTRICTS = [
+const INITIAL_DISTRICTS = [
   { name: "Colombo", lat: 6.9271, lng: 79.8612, temp: 31, rain: 0, aqi: 45, alert: "None" },
   { name: "Galle", lat: 6.0328, lng: 80.2170, temp: 29, rain: 5, aqi: 30, alert: "High Tide" },
   { name: "Kandy", lat: 7.2906, lng: 80.6337, temp: 26, rain: 2, aqi: 20, alert: "None" },
@@ -103,6 +106,39 @@ export default function LiveMap() {
   const [mapCenter, setMapCenter] = useState<[number, number]>([7.8731, 80.7718]);
   const [mapZoom, setMapZoom] = useState(7);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [districtsData, setDistrictsData] = useState(INITIAL_DISTRICTS);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch real-time data
+  useEffect(() => {
+    async function fetchLiveMapData() {
+      setIsLoading(true);
+      const lats = INITIAL_DISTRICTS.map(d => d.lat);
+      const lngs = INITIAL_DISTRICTS.map(d => d.lng);
+      
+      const data = await getBatchWeatherData(lats, lngs);
+      
+      if (data) {
+        const isArray = Array.isArray(data);
+        
+        const updated = INITIAL_DISTRICTS.map((d, index) => {
+          const locationData = isArray ? data[index] : data;
+          
+          if (locationData && locationData.current) {
+            return {
+              ...d,
+              temp: Math.round(locationData.current.temperature_2m),
+              rain: locationData.current.precipitation,
+            };
+          }
+          return d;
+        });
+        setDistrictsData(updated);
+      }
+      setIsLoading(false);
+    }
+    fetchLiveMapData();
+  }, []);
 
   const toggleLayer = (id: string) => {
     setActiveLayers(prev => 
@@ -110,7 +146,7 @@ export default function LiveMap() {
     );
   };
 
-  const handleDistrictClick = (district: typeof DISTRICTS[0]) => {
+  const handleDistrictClick = (district: typeof INITIAL_DISTRICTS[0]) => {
     setSelectedDistrict(district);
     setMapCenter([district.lat, district.lng]);
     setMapZoom(10);
@@ -135,7 +171,14 @@ export default function LiveMap() {
   }, []);
 
   return (
-    <div className={`absolute inset-0 bg-[#0F172A] overflow-hidden ${isFullscreen ? 'z-[100]' : 'z-0'}`}>
+    <div className={`fixed left-0 right-0 bottom-0 bg-[#0F172A] overflow-hidden ${isFullscreen ? 'top-0 z-[100]' : 'top-16 z-40'}`}>
+      
+      {isLoading && (
+        <div className="absolute inset-0 z-[2000] flex flex-col items-center justify-center bg-[#0F172A]/80 backdrop-blur-sm">
+          <Loader2 className="h-12 w-12 text-primary animate-spin mb-4" />
+          <p className="text-white font-medium tracking-widest uppercase">Fetching Live Telemetry...</p>
+        </div>
+      )}
       
       {/* Left Sidebar - Layer Controls */}
       <div className="absolute left-4 top-20 bottom-4 w-64 z-[1000] flex flex-col gap-4 pointer-events-none hidden md:flex">
@@ -205,7 +248,7 @@ export default function LiveMap() {
           <MapController center={mapCenter} zoom={mapZoom} />
           
           {/* District Markers */}
-          {DISTRICTS.map((district) => (
+          {districtsData.map((district) => (
             <Marker 
               key={district.name} 
               position={[district.lat, district.lng]}

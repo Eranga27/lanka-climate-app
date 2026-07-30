@@ -47,6 +47,23 @@ export async function getWeatherData(lat: number, lng: number) {
   }
 }
 
+export async function getBatchWeatherData(lats: number[], lngs: number[]) {
+  try {
+    const params = new URLSearchParams({
+      latitude: lats.join(","),
+      longitude: lngs.join(","),
+      current: "temperature_2m,precipitation,weather_code",
+      timezone: "auto",
+    });
+
+    const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching batch weather data:", error);
+    return null;
+  }
+}
+
 export async function getMarineData(lat: number, lng: number) {
   try {
     const params = new URLSearchParams({
