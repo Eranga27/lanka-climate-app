@@ -1,8 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
-  basePath: "/lanka-climate-app",
+  // Removed: output: "export" — migrating to Vercel which supports full Next.js
+  // This unlocks SSR, API routes, server components, and fixes Leaflet map loading
   images: {
     unoptimized: true,
   },
