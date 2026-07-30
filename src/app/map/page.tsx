@@ -19,7 +19,7 @@ const DynamicLiveMap = dynamic(() => import("@/components/map/LiveMap"), {
 
 export default function LiveMapPage() {
   return (
-    <div className="flex-1 flex w-full relative h-[calc(100vh-4rem)] lg:h-[calc(100vh)]">
+    <div className="flex-1 flex w-full relative h-[calc(100vh-4rem)]">
        <DynamicLiveMap />
     </div>
   );

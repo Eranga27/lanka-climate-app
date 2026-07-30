@@ -63,7 +63,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className="min-h-full flex flex-col bg-background text-foreground pb-24 lg:pb-0"
+        className="min-h-full flex flex-col bg-background text-foreground"
         style={{ fontFamily: "'Poppins', system-ui, sans-serif" }}
       >
         <Navbar />
