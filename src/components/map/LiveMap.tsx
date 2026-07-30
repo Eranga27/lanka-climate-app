@@ -111,7 +111,7 @@ export default function LiveMap() {
   }, []);
 
   return (
-    <div className={`flex w-full h-full relative bg-[#0F172A] ${isFullscreen ? 'fixed inset-0 z-[100]' : 'min-h-[calc(100vh-4rem)] lg:min-h-[calc(100vh)]'}`}>
+    <div className={`flex flex-1 w-full h-full relative bg-[#0F172A] ${isFullscreen ? 'fixed inset-0 z-[100]' : 'min-h-[calc(100vh-4rem)] lg:min-h-[calc(100vh)]'}`}>
       
       {/* Left Sidebar - Layer Controls */}
       <div className="absolute left-4 top-20 bottom-4 w-64 z-[1000] flex flex-col gap-4 pointer-events-none hidden md:flex">
