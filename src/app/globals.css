@@ -161,3 +161,16 @@
   /* Page section spacing */
   .page-section { @apply px-4 md:px-6 lg:px-8; }
 }
+
+/* Fix Leaflet map sizing issues in Next.js + Tailwind */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 400px;
+  z-index: 0;
+}
+/* Fix leaflet images getting squished by tailwind base styles */
+.leaflet-container img {
+  max-width: none !important;
+  max-height: none !important;
+}
