@@ -21,10 +21,10 @@ L.Icon.Default.mergeOptions({
 
 // Base map options
 const BASE_MAPS = {
-  satellite: { name: "Google Satellite", url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" },
+  satellite: { name: "Satellite", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" },
   dark: { name: "Dark Mode", url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" },
-  terrain: { name: "Google Terrain", url: "https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}" },
-  road: { name: "Google Roadmap", url: "https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}" }
+  terrain: { name: "Terrain", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}" },
+  road: { name: "Roadmap", url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" }
 };
 
 const LAYERS = [
